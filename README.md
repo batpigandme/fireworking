@@ -79,6 +79,8 @@ ggplot(injuries_by_year, aes(x = year, y = estimated_injuries)) +
 Looks like 2020 was a big year for getting injured with fireworks (which
 is probably a surprise to no one).
 
+------------------------------------------------------------------------
+
 [1] Marier, A., Smith, B., Lee, S. (2021, June). *2020 Fireworks Annual
 Report: Fireworks-related deaths, emergency depertment-treated injuries,
 and enforcement activities during 2020*. U.S. Consumer Product Safety

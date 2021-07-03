@@ -74,7 +74,7 @@ ggplot(injuries_by_year, aes(x = year, y = estimated_injuries)) +
   hrbrthemes::theme_ipsum()
 ```
 
-<img src="README_files/figure-gfm/injuries-by-year-1.png" title="Estimated fireworks-related injuries from 2005 to 2020" alt="Estimated fireworks-related injuries from 2005 to 2020"  />
+<img src="README_files/figure-gfm/injuries-by-year-1.png" title="Estimated fireworks-related injuries from 2005 to 2020: A scatterplot showing an increasing trend in estimated-injuries from 2008 to 2020" alt="Estimated fireworks-related injuries from 2005 to 2020: A scatterplot showing an increasing trend in estimated-injuries from 2008 to 2020"  />
 
 Looks like 2020 was a big year for getting injured with fireworks (which
 is probably a surprise to no one).

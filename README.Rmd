@@ -48,7 +48,7 @@ injuries_by_year
 ```
 Now let's plot it to see the general trend visually.
 
-```{r injuries-by-year, fig.alt="Estimated fireworks-related injuries from 2005 to 2020"}
+```{r injuries-by-year, fig.alt="Estimated fireworks-related injuries from 2005 to 2020: A scatterplot showing an increasing trend in estimated-injuries from 2008 to 2020"}
 ggplot(injuries_by_year, aes(x = year, y = estimated_injuries)) +
   geom_point() +
   scale_y_continuous(label = scales::label_comma()) +

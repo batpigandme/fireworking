@@ -1,0 +1,65 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  dev = "ragg_png",
+  dpi = 300
+)
+```
+
+# `r emo::ji("fireworks")` fireworking
+
+Playing around with data from U.S. Consumer Products Safety Commission (CPSC) [2020 Fireworks Annual Report](https://www.cpsc.gov/s3fs-public/2020-Fireworks-Annual-Report.pdf).[^1]
+
+```{r libs, message=FALSE}
+library(tidyverse)
+library(tabulizer)
+library(pdftools)
+# plus some bonus appearances from other packages,
+# e.g. {janitor}, {hrbrthemes}, and {scales}
+```
+The report is available online as a pdf, so let's tell R about that.
+
+```{r pdf-url}
+pdf_file <- "https://www.cpsc.gov/s3fs-public/2020-Fireworks-Annual-Report.pdf"
+```
+
+Now we'll extract the table on p.14 of the report using [{tabulizer}](https://github.com/ropensci/tabulizer), and do a little cleaning up with an assist from [{janitor}](https://sfirke.github.io/janitor/index.html).
+
+```{r table-one}
+p14_tables <- extract_tables(pdf_file, pages = 14, output = "data.frame")
+
+# returns a list, so take first item from list
+injuries_by_year <- p14_tables[[1]]
+
+injuries_by_year <- injuries_by_year %>%
+  as_tibble() %>%
+  janitor::clean_names() %>%
+  mutate(estimated_injuries = as.numeric(str_remove(estimated_injuries, ","))) %>%
+  rename("injuries_per_100000" = "injuries_per_100_000_people")
+
+injuries_by_year
+```
+Now let's plot it to see the general trend visually.
+
+```{r injuries-by-year, fig.alt="Estimated fireworks-related injuries from 2005 to 2020"}
+ggplot(injuries_by_year, aes(x = year, y = estimated_injuries)) +
+  geom_point() +
+  scale_y_continuous(label = scales::label_comma()) +
+  labs(title = "Estimated fireworks-related injuries 2005-2020",
+       caption = "source: NEISS, U.S. CPSC",
+       alt = paste("A scatterplot showing an increasing trend in",
+                   "estimated-injuries from 2008 to 2020")) +
+  ylab("estimated injuries") +
+  hrbrthemes::theme_ipsum()
+```
+
+Looks like 2020 was a big year for getting injured with fireworks (which is probably a surprise to no one).
+
+[^1]: Marier, A., Smith, B., Lee, S. (2021, June). _2020 Fireworks Annual Report: Fireworks-related deaths, emergency depertment-treated injuries, and enforcement activities during 2020_. U.S. Consumer Product Safety Commission. https://www.cpsc.gov/s3fs-public/2020-Fireworks-Annual-Report.pdf

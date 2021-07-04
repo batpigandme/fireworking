@@ -80,7 +80,8 @@ Looks like 2020 was a big year for getting injured with fireworks (which
 is probably a surprise to no one).
 
 Let’s see if we can get the data from one of the more complicated (read:
-multiple-headered, non-tidy) tables, like the one on page 24.
+multiple-headered, non-tidy) tables, like the one on page 24 breaking
+down 2020 injuries by body region and type.
 
 ``` r
 p24_tables <- extract_tables(pdf_file, pages = 24, output = "data.frame")

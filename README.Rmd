@@ -62,6 +62,58 @@ ggplot(injuries_by_year, aes(x = year, y = estimated_injuries)) +
 
 Looks like 2020 was a big year for getting injured with fireworks (which is probably a surprise to no one).
 
+Let's see if we can get the data from one of the more complicated (read: multiple-headered, non-tidy) tables, like the one on page 24.
+
+```{r p24-table}
+p24_tables <- extract_tables(pdf_file, pages = 24, output = "data.frame")
+
+inj_by_body_region <- tibble(p24_tables[[1]]) # tibble for the printing
+
+inj_by_body_region
+```
+OK, it's not the worst thing in the world, but it needs some fixing up. We've got the headers we _actually_ want in the first row, and we've got two sets of values in the row currently labelled "Diagnosis". I'm sure the latter problem could be dealt with in a nicer way using regular expressions, or something of the sort, but I'm gonna cheat and just replace it to make my life easier.
+
+
+```{r}
+inj_by_body_region[1,4] <- "Contusions/Lacerations Fractures/Sprains"
+```
+
+Since [{janitor}](https://sfirke.github.io/janitor) has a bunch of functions that are handy for cleaning things like this up, let's go ahead and just load the library. I'm also going to use `separate()` on the empty (-looking) rows to my advantage, so I can filter them out later with `is.na()`.
+
+```{r, message=FALSE}
+library(janitor)
+
+inj_by_body_region %>%
+  separate(Diagnosis, c("diagnosis1", "diagnosis2"), sep = " ") %>%
+  filter(!is.na(diagnosis2)) %>%
+  row_to_names(1) %>%
+  clean_names() -> inj_body_region
+
+inj_body_region
+```
+
+Looking pretty good! Even though the `*` denotes "estimates of fewer than 50 injuries," I'm going to replace them with zeroes so that we can treat the column (and all the other number-y ones) as numeric. We'll also ditch the row with "Total" listed as a `body_region`, since it's not one, as well as the `total` column, since we know how to add.
+
+```{r}
+inj_body_region %>%
+  mutate("fractures_sprains" = replace(fractures_sprains, fractures_sprains == "*", "0")) %>%
+  mutate(across(-body_region, ~ as.numeric(str_remove(.x, ",")))) %>%
+  filter(body_region != "Total") %>%
+  select(-total) -> inj_body_region2
+
+inj_body_region2
+```
+
+Our data _still_ isn't quite in the tidy form I want (though it does make for a nice, concise-looking table). Let's `pivot_longer()` to make the type of injury a variable/column.
+
+```{r}
+tidy_inj_body_region <- inj_body_region2 %>%
+  pivot_longer(!body_region, names_to = "injury", values_to = "count")
+
+tidy_inj_body_region
+```
+At this point, do I regret making those clean column names? Maybe a little…but I really hate dealing with backticks. Plus, I could always go back in and make things pretty now.
+
 ---
 
 [^1]: Marier, A., Smith, B., Lee, S. (2021, June). _2020 Fireworks Annual Report: Fireworks-related deaths, emergency depertment-treated injuries, and enforcement activities during 2020_. U.S. Consumer Product Safety Commission. https://www.cpsc.gov/s3fs-public/2020-Fireworks-Annual-Report.pdf
